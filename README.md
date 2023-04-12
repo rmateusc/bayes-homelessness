@@ -1,1 +1,3 @@
 # bayes-homelessness
+
+This project aims to identify the main factors that contribute to the persistence of homelessness in Colombia using a Bayesian approach. The issue of homelessness in Colombia is complex and multifaceted, and despite ongoing efforts by the government and non-governmental organizations, it remains a persistent problem. The project builds on previous research conducted in Colombia and other countries to provide a more comprehensive understanding of the factors that contribute to homelessness in Colombia.
