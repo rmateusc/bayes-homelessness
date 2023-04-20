@@ -1,0 +1,14 @@
+# Data Management
+numpy==1.23.0
+pandas==2.0.0
+
+# Data Visualization
+matplotlib==3.7.1
+seaborn==0.12.2
+
+# EDA and Experimentation
+
+# Bayesian Implementation
+scipy==1.7.3
+pymc3==3.11.2
+arviz==0.11.2
