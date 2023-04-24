@@ -3,19 +3,21 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from pandas import DataFrame
-
-def filter_data(df: DataFrame) -> DataFrame:
+def filter_data(df: pd.DataFrame) -> pd.DataFrame:
     # delete incomplete surveys
     data = df.copy()
     data.dropna(subset=['COMPLETA'], inplace=True)
     del data['COMPLETA']
 
     # filter data only including direct interviews
-    data['entrevista_directa'] = data[['P35', 'P36R', 'P37S1', 'P37S2', 'P37S3', 'P37S4', 'P37S5', 'P37S6', 'P37S7']].sum(axis=1)
+    data['entrevista_directa'] = data[
+        ['P35', 'P36R', 'P37S1', 'P37S2', 'P37S3',
+         'P37S4', 'P37S5', 'P37S6', 'P37S7']].sum(axis=1)
     data.query('entrevista_directa == 0', inplace=True)
     data.reset_index(drop=True, inplace=True)
-    data.drop(columns=['P35', 'P36R', 'P37S1', 'P37S2', 'P37S3', 'P37S4', 'P37S5', 'P37S6', 'P37S7', 'entrevista_directa'], inplace=True)
+    data.drop(columns=[
+        'P35', 'P36R', 'P37S1', 'P37S2', 'P37S3', 'P37S4',
+        'P37S5', 'P37S6', 'P37S7', 'entrevista_directa'], inplace=True)
 
     # delete columns with irrelevant information
     data.drop(columns=[
@@ -94,18 +96,27 @@ def filter_data(df: DataFrame) -> DataFrame:
     ], inplace=True)
 
     # filter data with non available information
-    data.dropna(subset=['P16S1', 'P16S2', 'P16S3', 'P16S4', 'P16S5', 'P16S6', 'P16S7', 'P16S8', 'P16S9'], how='all', inplace=True)
+    data.dropna(subset=[
+        'P16S1', 'P16S2', 'P16S3', 'P16S4', 'P16S5',
+        'P16S6', 'P16S7', 'P16S8', 'P16S9'], how='all', inplace=True)
     # if score = 9, the individual is completely healthy, if not: DISABILITY
-    data['sano'] = (data[['P16S1', 'P16S2', 'P16S3', 'P16S4', 'P16S5', 'P16S6', 'P16S7', 'P16S8', 'P16S9']] == 4).sum(axis=1)
-    data.drop(columns=['P16S1', 'P16S2', 'P16S3', 'P16S4', 'P16S5', 'P16S6', 'P16S7', 'P16S8', 'P16S9'], inplace=True)
+    data['sano'] = (data[
+        ['P16S1', 'P16S2', 'P16S3', 'P16S4', 'P16S5',
+         'P16S6', 'P16S7', 'P16S8', 'P16S9']] == 4).sum(axis=1)
+    data.drop(columns=[
+        'P16S1', 'P16S2', 'P16S3', 'P16S4', 'P16S5',
+        'P16S6', 'P16S7', 'P16S8', 'P16S9'], inplace=True)
     # data['sano'].replace({1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:1}, inplace=True)
     # data['sano'].astype(bool).replace({True: 0, False: 1}, inplace=True)
     data['discapacidad'] = (data['sano'] < 9).astype(int)
     data.drop(columns=['sano'], inplace=True)
 
     # calculate if the individual has any disease
-    data['enfermedad'] = (data[['P20S1', 'P20S2', 'P20S3', 'P20S4', 'P20S5']].sum(axis=1) == 10).replace({True: 0, False: 1})
-    data.drop(columns=['P20S1', 'P20S2', 'P20S3', 'P20S4', 'P20S5'], inplace=True)
+    data['enfermedad'] = (data[
+        ['P20S1', 'P20S2', 'P20S3', 'P20S4', 'P20S5']
+        ].sum(axis=1) == 10).replace({True: 0, False: 1})
+    data.drop(columns=['P20S1', 'P20S2', 'P20S3', 'P20S4', 'P20S5'],
+              inplace=True)
 
     # calculate months living in the streets
     data['meses_en_calle'] = data['P23S1R'] * 12 + data['P23S2']
@@ -119,8 +130,11 @@ def filter_data(df: DataFrame) -> DataFrame:
     data.drop(columns=['P25'], inplace=True)
 
     # determine if the individual recieves any type of help
-    data['recibe_ayuda'] = (data[['P26S1', 'P26S2', 'P26S3', 'P26S4', 'P26S5', 'P26S6']].sum(axis=1) == 12).astype(int)
-    data.drop(columns=['P26S1', 'P26S2', 'P26S3', 'P26S4', 'P26S5', 'P26S6'], inplace=True)
+    data['recibe_ayuda'] = (data[
+        ['P26S1', 'P26S2', 'P26S3', 'P26S4','P26S5', 'P26S6']
+        ].sum(axis=1) == 12).astype(int)
+    data.drop(columns=['P26S1', 'P26S2', 'P26S3', 'P26S4', 'P26S5', 'P26S6'],
+              inplace=True)
 
     # determine average years of education
     data['P28R'].replace({
@@ -140,13 +154,20 @@ def filter_data(df: DataFrame) -> DataFrame:
     data.dropna(subset=['anios_educacion'], inplace=True)
 
     # determine if the individual has any type of addiction to psychoactive substances
-    data['consume_drogas'] = (data[['P30S1', 'P30S2',	'P30S3', 'P30S4', 'P30S5', 'P30S6', 'P30S7', 'P30S8', 'P30S9']].sum(axis=1) < 18).astype(int)
-    data.drop(columns=['P30S1', 'P30S2',	'P30S3', 'P30S4', 'P30S5', 'P30S6', 'P30S7', 'P30S8', 'P30S9'], inplace=True)
+    data['consume_drogas'] = (data[
+        ['P30S1', 'P30S2',	'P30S3', 'P30S4', 'P30S5',
+         'P30S6', 'P30S7', 'P30S8', 'P30S9']].sum(axis=1) < 18).astype(int)
+    data.drop(columns=['P30S1', 'P30S2', 'P30S3', 'P30S4', 'P30S5',
+                       'P30S6', 'P30S7', 'P30S8', 'P30S9'], inplace=True)
 
     # determine the average age of substance consumption
-    data['edad_promedio_inicio_consumo'] = (data[['P30S1A1R', 'P30S2A1R', 'P30S3A1R', 'P30S4A1R', 'P30S5A1R', 'P30S6A1R', 'P30S7A1R', 'P30S8A1R', 'P30S9A1R']].mean(axis=1)).astype(float)
+    data['edad_promedio_inicio_consumo'] = (data[
+        ['P30S1A1R', 'P30S2A1R', 'P30S3A1R', 'P30S4A1R', 'P30S5A1R', 'P30S6A1R',
+         'P30S7A1R', 'P30S8A1R', 'P30S9A1R']].mean(axis=1)).astype(float)
     data['edad_promedio_inicio_consumo'].replace({np.nan: 0}, inplace=True)
-    data.drop(columns=['P30S1A1R', 'P30S2A1R', 'P30S3A1R', 'P30S4A1R', 'P30S5A1R', 'P30S6A1R', 'P30S7A1R', 'P30S8A1R', 'P30S9A1R'], inplace=True)
+    data.drop(columns=['P30S1A1R', 'P30S2A1R', 'P30S3A1R', 'P30S4A1R',
+                       'P30S5A1R', 'P30S6A1R', 'P30S7A1R', 'P30S8A1R',
+                       'P30S9A1R'], inplace=True)
 
     # determine if th invididual belongs to the lgbtq+ community
     data['P34'].replace({2: 0, 3: 0}, inplace=True)
@@ -166,7 +187,8 @@ def filter_data(df: DataFrame) -> DataFrame:
     data['hombre'] = data['hombre'].astype(int)
 
     # replace minority from 1,2,3,4,5 to 1 and 6 to 0
-    data['minoria_raza'].replace({1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 0}, inplace=True)
+    data['minoria_raza'].replace({1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 0},
+                                 inplace=True)
     data['minoria_raza'] = data['minoria_raza'].astype(int)
 
     # drop columns no dummy
@@ -178,23 +200,25 @@ def filter_data(df: DataFrame) -> DataFrame:
     return data
 
 
-def add_logarithmic_variables(data: DataFrame) -> None:
+def add_logarithmic_variables(data: pd.DataFrame) -> None:
     # get log of data for better distribution
     data['ln_edad'] = np.log(data['edad'])
-    data['ln_edad_promedio_inicio_consumo'] = np.log(data['edad_promedio_inicio_consumo'])
+    data['ln_edad_promedio_inicio_consumo'] = np.log(
+        data['edad_promedio_inicio_consumo']
+        )
     data['ln_meses_en_calle'] = np.log(data['meses_en_calle'])
     data['ln_anios_en_calle'] = np.log(data['anios_en_calle'])
 
     # replace -inf with 0
-    data['ln_edad_promedio_inicio_consumo'].replace({-np.inf: 0}, inplace=True)
+    data['ln_edad_promedio_inicio_consumo'].replace({-np.inf: 0},
+                                                    inplace=True)
     data['ln_meses_en_calle'].replace({-np.inf: 0}, inplace=True)
     data['ln_anios_en_calle'].replace({-np.inf: 0}, inplace=True)
 
 
 def plot_correlations(
-        data: DataFrame,
-        variables: list,
-        save: bool) -> None:
+        data: pd.DataFrame, variables: list, save: bool
+        ) -> None:
     # select variables of interest
     correlations = data[variables]
     # get heatmap of correlations
