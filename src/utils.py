@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -126,7 +127,7 @@ def filter_data(df: pd.DataFrame) -> pd.DataFrame:
     data['anios_en_calle'] = data['meses_en_calle'] / 12
 
     # determine if the individual has contact with family
-    data['contacto_familia'] = (data['P25'] == 9).astype(int) # no tiene contacto con la familia
+    data['contacto_familia'] = (data['P25'] != 9).astype(int) # tiene contacto con la familia
     data.drop(columns=['P25'], inplace=True)
 
     # determine if the individual recieves any type of help
@@ -194,31 +195,40 @@ def filter_data(df: pd.DataFrame) -> pd.DataFrame:
     # drop columns no dummy
     data.drop(columns=[
         'razon_empezar_calle',
-        'razon_seguir_calle'
+        'razon_seguir_calle',
+        'meses_en_calle'
     ], inplace=True)
+
+    # rename columns
+    data.rename(columns={
+        'edad': 'age',
+        'hombre': 'gender',
+        'minoria_raza': 'race_minority',
+        'anios_educacion': 'years_education',
+        'discapacidad': 'disability',
+        'enfermedad': 'disease',
+        'contacto_familia': 'family_contact',
+        'recibe_ayuda': 'recieves_help',
+        'consume_drogas': 'drug_consumption',
+        'edad_promedio_inicio_consumo': 'avg_age_drug_consumption',
+        'minoria_lgbt': 'lgbt_minority',
+        'ln_anios_en_calle': 'ln_years_street',
+        }, inplace=True
+    )
 
     return data
 
-
 def add_logarithmic_variables(data: pd.DataFrame) -> None:
     # get log of data for better distribution
-    data['ln_edad'] = np.log(data['edad'])
-    data['ln_edad_promedio_inicio_consumo'] = np.log(
-        data['edad_promedio_inicio_consumo']
-        )
-    data['ln_meses_en_calle'] = np.log(data['meses_en_calle'])
-    data['ln_anios_en_calle'] = np.log(data['anios_en_calle'])
-
-    # replace -inf with 0
-    data['ln_edad_promedio_inicio_consumo'].replace({-np.inf: 0},
-                                                    inplace=True)
-    data['ln_meses_en_calle'].replace({-np.inf: 0}, inplace=True)
-    data['ln_anios_en_calle'].replace({-np.inf: 0}, inplace=True)
-
+    data['ln_years_street'] = np.log(data['anios_en_calle'])
+    data['ln_years_street'].replace({-np.inf: 0}, inplace=True)
 
 def plot_correlations(
         data: pd.DataFrame, variables: list, save: bool
         ) -> None:
+    # Get root directory
+    root_dir = os.path.dirname(os.path.abspath(''))
+
     # select variables of interest
     correlations = data[variables]
     # get heatmap of correlations
@@ -227,4 +237,6 @@ def plot_correlations(
     plt.show()
     # save heatmap
     if save:
-        ax.figure.savefig('heatmap.png')
+        ax.figure.savefig(
+            os.path.join(root_dir, 'figures', 'heatmap.png')
+            )
