@@ -215,7 +215,6 @@ def filter_data(df: pd.DataFrame) -> pd.DataFrame:
         'ln_anios_en_calle': 'ln_years_street',
         }, inplace=True
     )
-
     return data
 
 def add_logarithmic_variables(data: pd.DataFrame) -> None:
@@ -228,15 +227,44 @@ def plot_correlations(
         ) -> None:
     # Get root directory
     root_dir = os.path.dirname(os.path.abspath(''))
-
     # select variables of interest
     correlations = data[variables]
     # get heatmap of correlations
-    ax = plt.figure(figsize=(10, 10))
-    ax = sns.heatmap(correlations.corr(), annot=True, cmap='coolwarm')
-    plt.show()
+    plt.figure(figsize=(10, 10))
+    # set black and white color palette
+    sns.heatmap(
+        correlations.corr(), annot=True, cmap='binary',  vmin=-1, vmax=1
+    )
+    plt.tight_layout()
     # save heatmap
     if save:
-        ax.figure.savefig(
+        plt.savefig(
             os.path.join(root_dir, 'figures', 'heatmap.png')
+            )
+    plt.show()
+
+def bar_plot(
+        data: pd.DataFrame,
+        variable: str,
+        save: bool,
+        save_name: str
+        ) -> None:
+    # Get root directory
+    root_dir = os.path.dirname(os.path.abspath(''))
+    # plot bar plot
+    ax = sns.countplot(
+        x = variable,
+        data = data,
+        palette = ['grey']*len(data[variable]),
+        order = data[variable].value_counts().index
+    )
+    # change x axis labels to vertical
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
+    # change x axis name
+    ax.set(xlabel=save_name)
+    plt.show()
+    # save bar plot
+    if save:
+        ax.figure.savefig(
+            os.path.join(root_dir, 'figures', save_name + '.png')
             )
